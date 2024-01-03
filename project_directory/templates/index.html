@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Appointment Scheduler</title>
+</head>
+<body>
+    <h1>Medical Appointment Scheduler</h1>
+
+    <form id="appointmentForm">
+        <label for="patientName">Patient Name:</label>
+        <input type="text" id="patientName" required><br>
+
+        <label for="doctorName">Doctor Name:</label>
+        <input type="text" id="doctorName" required><br>
+
+        <label for="dateTime">Date and Time:</label>
+        <input type="datetime-local" id="dateTime" required><br>
+
+        <button type="button" onclick="scheduleAppointment()">Schedule Appointment</button>
+    </form>
+
+    <h2>Appointments:</h2>
+    <ul id="appointmentsList"></ul>
+
+    <script>
+        async function scheduleAppointment() {
+            const patientName = document.getElementById('patientName').value;
+            const doctorName = document.getElementById('doctorName').value;
+            const dateTime = document.getElementById('dateTime').value;
+
+            const response = await fetch('/schedule_appointment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    patient_name: patientName,
+                    doctor_name: doctorName,
+                    date_time: dateTime
+                })
+            });
+
+            const result = await response.json();
+            alert(result.message);
+            loadAppointments();
+        }
+
+        async function loadAppointments() {
+            const response = await fetch('/get_appointments');
+            const data = await response.json();
+
+            const appointmentsList = document.getElementById('appointmentsList');
+            appointmentsList.innerHTML = '';
+
+            data.appointments.forEach(appointment => {
+                const li = document.createElement('li');
+                li.textContent = `${appointment.patient_name} - ${appointment.doctor_name} - ${appointment.date_time}`;
+                appointmentsList.appendChild(li);
+            });
+        }
+
+        loadAppointments();
+    </script>
+</body>
+</html>
